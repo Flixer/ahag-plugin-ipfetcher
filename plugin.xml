@@ -19,6 +19,9 @@
                 <param name="android-package" value="org.apache.cordova.plugin.ipfetcher.IPFetcher"/>
                 <param name="onload" value="true"/>
             </feature>
+
+            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+            <uses-permission android:name="android.permission.INTERNET"/>
         </config-file>
 
         <source-file src="src/android/org/apache/cordova/plugin/ipfetcher/IPFetcher.java"

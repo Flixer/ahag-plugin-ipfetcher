@@ -12,21 +12,95 @@ import org.json.JSONObject;
 */
 public class IPFetcher extends CordovaPlugin {
 
-@Override
-public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-    if (action.equals("fetchip")) {
-        String message = args.getString(0);
-        this.echo(message, callbackContext);
+
+    private static final String LOG_TAG = "NetworkCrawler";
+    private static final int TIMEOUT = 500;
+
+    public static final ArrayList<String> deviceList = new ArrayList<String>();
+
+    @Override
+    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+        if (action.equals("fetchip")) {
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        final long start = System.currentTimeMillis();
+
+                        ExecutorService es = Executors.newFixedThreadPool(500);
+
+                        WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+                        String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+                        String subnet = ip.substring(0, ip.lastIndexOf("."));
+                        Log.i("NetworkCrawler", "Crawling subnet: " + subnet);
+                        crawlSubnet(es, subnet);
+    //                    for (int n = 1; n < 255; n++) {
+    //                        NetworkCrawler.crawlSubnet(es, "192.168." + n);
+    //                    }
+                        es.shutdown();
+
+                        boolean finshed = es.awaitTermination(2, TimeUnit.MINUTES);
+                        Log.i("NetworkCrawler", "Execution time: " + ((System.currentTimeMillis() - start) / 1000));
+
+                        Log.i("NetworkCrawler", "DEVICE FOUND: " + TextUtils.join("|", deviceList));
+                        callbackContext.success(TextUtils.join("|", deviceList));
+                    } catch (Exception e) {
+                        Log.e("NetworkCrawler", "Upps", e);
+                        callbackContext.error("Something went wrong");
+                    }
+                }
+            };
+            new Thread(r).start();
+        }
         return true;
     }
-    return false;
-}
 
-private void echo(String message, CallbackContext callbackContext) {
-    if (message != null && message.length() > 0) {
-        callbackContext.success(message);
-    } else {
-        callbackContext.error("Expected one non-empty string argument.");
+    public static void crawlSubnet(ExecutorService es, String subnet) {
+        Log.v(LOG_TAG, "Checking Subnet " + subnet);
+
+        for (int i = 1; i < 255; i++) {
+            final String host = subnet + "." + i;
+
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (InetAddress.getByName(host).isReachable(TIMEOUT)) {
+                            Log.i(LOG_TAG, host + " is possible reachable");
+                            if (checkHostWithPort(host, 8080) && checkHostWithPort(host, 80)) {
+                                deviceList.add(host);
+                                Log.i(LOG_TAG, host + " is reachable");
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.e(LOG_TAG, "Could not check host " + host, e);
+                    }
+                }
+            };
+            es.execute(r);
+        }
+
     }
-}
+
+    public static boolean checkHostWithPort(String host, int port) {
+        Socket socket = new Socket();
+        try {
+            InetSocketAddress socketAddr = new InetSocketAddress(host, port);
+            socket.connect(socketAddr, TIMEOUT);
+
+            return true;
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Could not check host" + host + " with port " + port, e);
+        } finally {
+            try {
+                socket.close();
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Could not close socket", e);
+            }
+        }
+        return false;
+    }
+
+
+
 }
