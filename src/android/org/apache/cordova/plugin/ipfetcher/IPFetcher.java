@@ -3,9 +3,9 @@ package org.apache.cordova.plugin.ipfetcher;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
 
+import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.Log;
@@ -34,7 +34,7 @@ public class IPFetcher extends CordovaPlugin {
     public static final ArrayList<String> deviceList = new ArrayList<String>();
 
     @Override
-    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+    public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
         if (action.equals("fetchip")) {
             Runnable r = new Runnable() {
                 @Override
@@ -44,7 +44,7 @@ public class IPFetcher extends CordovaPlugin {
 
                         ExecutorService es = Executors.newFixedThreadPool(500);
 
-                        WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+                        WifiManager wm = (WifiManager) IPFetcher.this.cordova.getActivity().getSystemService(Context.WIFI_SERVICE);
                         String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
                         String subnet = ip.substring(0, ip.lastIndexOf("."));
                         Log.i("NetworkCrawler", "Crawling subnet: " + subnet);
