@@ -3,9 +3,20 @@ package org.apache.cordova.plugin.ipfetcher;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import android.net.wifi.WifiManager;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
+import android.text.format.Formatter;
+import android.util.Log;
+
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
 * This class echoes a string called from JavaScript.
