@@ -47,7 +47,7 @@ public class IPFetcher extends CordovaPlugin {
                         WifiManager wm = (WifiManager) IPFetcher.this.cordova.getActivity().getSystemService(Context.WIFI_SERVICE);
                         String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
                         String subnet = ip.substring(0, ip.lastIndexOf("."));
-                        Log.i("NetworkCrawler", "Crawling subnet: " + subnet);
+                        // Log.i("NetworkCrawler", "Crawling subnet: " + subnet);
                         crawlSubnet(es, subnet);
     //                    for (int n = 1; n < 255; n++) {
     //                        NetworkCrawler.crawlSubnet(es, "192.168." + n);
@@ -55,7 +55,7 @@ public class IPFetcher extends CordovaPlugin {
                         es.shutdown();
 
                         boolean finshed = es.awaitTermination(2, TimeUnit.MINUTES);
-                        Log.i("NetworkCrawler", "Execution time: " + ((System.currentTimeMillis() - start) / 1000));
+                        // Log.i("NetworkCrawler", "Execution time: " + ((System.currentTimeMillis() - start) / 1000));
 
                         Log.i("NetworkCrawler", "DEVICE FOUND: " + TextUtils.join("|", deviceList));
                         callbackContext.success(TextUtils.join("|", deviceList));
@@ -71,7 +71,7 @@ public class IPFetcher extends CordovaPlugin {
     }
 
     public static void crawlSubnet(ExecutorService es, String subnet) {
-        Log.v(LOG_TAG, "Checking Subnet " + subnet);
+        // Log.v(LOG_TAG, "Checking Subnet " + subnet);
 
         for (int i = 1; i < 255; i++) {
             final String host = subnet + "." + i;
@@ -81,14 +81,14 @@ public class IPFetcher extends CordovaPlugin {
                 public void run() {
                     try {
                         if (InetAddress.getByName(host).isReachable(TIMEOUT)) {
-                            Log.i(LOG_TAG, host + " is possible reachable");
+                            // Log.i(LOG_TAG, host + " is possible reachable");
                             if (checkHostWithPort(host, 8080) && checkHostWithPort(host, 80)) {
                                 deviceList.add(host);
-                                Log.i(LOG_TAG, host + " is reachable");
+                                // Log.i(LOG_TAG, host + " is reachable");
                             }
                         }
                     } catch (Exception e) {
-                        Log.e(LOG_TAG, "Could not check host " + host, e);
+                        // Log.e(LOG_TAG, "Could not check host " + host, e);
                     }
                 }
             };
@@ -105,12 +105,12 @@ public class IPFetcher extends CordovaPlugin {
 
             return true;
         } catch (Exception e) {
-            Log.e(LOG_TAG, "Could not check host" + host + " with port " + port, e);
+            // Log.e(LOG_TAG, "Could not check host" + host + " with port " + port, e);
         } finally {
             try {
                 socket.close();
             } catch (Exception e) {
-                Log.e(LOG_TAG, "Could not close socket", e);
+                // Log.e(LOG_TAG, "Could not close socket", e);
             }
         }
         return false;
