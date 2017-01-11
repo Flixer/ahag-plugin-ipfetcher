@@ -36,7 +36,7 @@ public class IPFetcher extends CordovaPlugin {
     @Override
     public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
         if (action.equals("fetchip")) {
-            deviceList = new ArrayList<String>();
+            deviceList.clear();
 
             Runnable r = new Runnable() {
                 @Override
